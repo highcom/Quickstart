@@ -6,6 +6,34 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/resTextView3"
+        android:layout_width="match_parent"
+        android:layout_height="92dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="18dp"
+        android:autoSizeTextType="uniform"
+        android:clickable="true"
+        android:onClick="resTextView_onClick3"
+        android:textSize="12sp"
+        app:autoSizeMinTextSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/resTextView2" />
+
+    <TextView
+        android:id="@+id/resTextView2"
+        android:layout_width="match_parent"
+        android:layout_height="73dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:autoSizeTextType="uniform"
+        android:clickable="true"
+        android:onClick="resTextView_onClick2"
+        android:textSize="12sp"
+        app:autoSizeMinTextSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/resTextView" />
+
     <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
@@ -46,12 +74,12 @@
         android:id="@+id/resTextView"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="36dp"
         android:autoSizeTextType="uniform"
         android:clickable="true"
-        android:textSize="24sp"
         android:onClick="resTextView_onClick"
+        android:textSize="12sp"
         app:autoSizeMinTextSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/hello" />

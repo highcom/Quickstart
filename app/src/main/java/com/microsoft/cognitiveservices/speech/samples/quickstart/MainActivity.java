@@ -55,17 +55,20 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     private static String primaryToken = "KJyTilMi2EA.cwA.UjY.WDd-zeGtpG9s41Sp_E11jEDb7EkTNvIHmShSTZFtRo8";
     private static String botName = "nandakke_qna_bot";
-    private static String primaryToken2 = "7yTJO2s_wP4.cwA.bcc.AVTtKCskIzkZ4FqX1XkQld9hM6tNlW3DgGSPBvBwO04";
-    private static String botName2 = "shimabot";
+    private static String primaryToken2 = "0tyZhernqF8.fnqsTQ3pUWXe3gfEZu7VH7QNprqJmN1EPKqDzPPYBJk";
+    private static String botName2 = "ys-temp-bot";
+    private static String primaryToken3 = "Oe1ifNUBT4s.07EOcXobHiymaFu8CXyf5sbEK_al6_--YWRumusHSU8";
+    private static String botName3 = "nandakke_qna_stable";
+
 
     private Button recognizeContinuousButton;
 
     private String conversationId = "";
     private String localToken = "";
-
-
     private String conversationId2 = "";
     private String localToken2 = "";
+    private String conversationId3 = "";
+    private String localToken3 = "";
 
     private TextView recognizedTextView;
 
@@ -208,6 +211,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         TextView txt = (TextView) this.findViewById(R.id.hello); //
         TextView resTxt = (TextView) this.findViewById(R.id.resTextView); //
+        TextView resTxt2 = (TextView) this.findViewById(R.id.resTextView2); //
+        TextView resTxt3 = (TextView) this.findViewById(R.id.resTextView3); //
 
         //質問ボタンを押下時にビープ音を鳴らす
         ToneGenerator toneGenerator
@@ -242,10 +247,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 //BOTからの回答をクリアする
                 resTxt.setText("");
+                resTxt2.setText("");
+                resTxt3.setText("");
 
                 //BOTに認識した音声を投げる
                 sendMessageToBot(result.getText(), conversationId,localToken);
                 sendMessageToBot(result.getText(), conversationId2,localToken2);
+                sendMessageToBot(result.getText(), conversationId3,localToken3);
             }
             else {
                 txt.setText("音声をうまく認識できませんした。ボタンを押下してもう一度最初からお願いします");
@@ -264,8 +272,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         protected String doInBackground(String... arg0) {
             String conversationTokenInfo = startConversation(primaryToken);
             String conversationTokenInfo2 = startConversation(primaryToken2);
+            String conversationTokenInfo3 = startConversation(primaryToken3);
             JSONObject jsonObject = null;
             JSONObject jsonObject2 = null;
+            JSONObject jsonObject3 = null;
 
             if(conversationTokenInfo != "") {
                 try {
@@ -283,6 +293,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 }
             }
 
+            if(conversationTokenInfo3 != "") {
+                try {
+                    jsonObject3 = new JSONObject(conversationTokenInfo3);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
             //send message to bot and get the response using the api conversations/{conversationid}/activities
             if(jsonObject != null) {
                 try {
@@ -297,6 +316,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 try {
                     conversationId2 = jsonObject2.get("conversationId").toString();
                     localToken2 = jsonObject2.get("token").toString();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(jsonObject3 != null) {
+                try {
+                    conversationId3 = jsonObject3.get("conversationId").toString();
+                    localToken3 = jsonObject3.get("token").toString();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -483,6 +511,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         //     Toast.LENGTH_SHORT).show();
         String botResponse = "";
         String botResponse2 = "";
+        String botResponse3 = "";
+
         if(conversationId != "" && localToken != "") {
             botResponse = getBotResponse(conversationId,localToken);
             if (botResponse != "") {
@@ -498,7 +528,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                         responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
                         resTxt.setText(responseMsg);
-
+                        speechText(responseMsg,1);
 
 
 
@@ -518,15 +548,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     Integer arrayLength = jsonObject.getJSONArray("activities").length();
                     String msgFrom = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).getJSONObject("from").get("id").toString();
                     String curMsgId = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).get("id").toString();
-                   // TextView resTxt = (TextView) this.findViewById(R.id.resTextView2); //
+                    TextView resTxt = (TextView) this.findViewById(R.id.resTextView2); //
 
                     if(msgFrom.trim().toLowerCase().equals(botName2)) {
 
                         responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
 
-                     //   resTxt.setText(responseMsg);
-
-
+                        resTxt.setText(responseMsg);
+                        speechText(responseMsg,2);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -534,6 +563,29 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             }
         }
 
+        if(conversationId3 != "" && localToken3 != "") {
+            botResponse3 = getBotResponse(conversationId3,localToken3);
+            if (botResponse3 != "") {
+                try {
+                    JSONObject jsonObject = new JSONObject(botResponse3);
+                    String responseMsg = "";
+                    Integer arrayLength = jsonObject.getJSONArray("activities").length();
+                    String msgFrom = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).getJSONObject("from").get("id").toString();
+                    String curMsgId = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).get("id").toString();
+                    TextView resTxt = (TextView) this.findViewById(R.id.resTextView3); //
+
+                    if(msgFrom.trim().toLowerCase().equals(botName3)) {
+
+                        responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
+
+                           resTxt.setText(responseMsg);
+                        speechText(responseMsg,3);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
         handler.postDelayed(runnable, 1000*5);
     }
@@ -549,8 +601,32 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
         intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView)).getText().toString());
         startActivity(intent);
+    }
 
+    public void resTextView_onClick2(View view){
+        //質問ボタンを押下時にビープ音を鳴らす
+        ToneGenerator toneGenerator
+                = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
+        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
 
+        // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
+        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+        // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
+        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView)).getText().toString());
+        startActivity(intent);
+    }
+
+    public void resTextView_onClick3(View view){
+        //質問ボタンを押下時にビープ音を鳴らす
+        ToneGenerator toneGenerator
+                = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
+        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
+
+        // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
+        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+        // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
+        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView)).getText().toString());
+        startActivity(intent);
     }
 
 
@@ -639,11 +715,19 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
     }
 
-    private void speechText(String text){
+    private void speechText(String text, Integer s){
         if(text.length() > 0){
             if(mTextToSpeech.isSpeaking()){
                 mTextToSpeech.stop();
             }
+            if (s ==1 ) {
+                mTextToSpeech.setSpeechRate(1.0f);
+            }else if( s == 2) {
+                mTextToSpeech.setSpeechRate(0.5f);
+            }else {
+                mTextToSpeech.setSpeechRate(1.3f);
+            }
+
             mTextToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
         }
     }
