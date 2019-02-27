@@ -19,13 +19,14 @@
 
     <TextView
         android:id="@+id/hello"
-        android:layout_width="match_parent"
-        android:layout_height="132dp"
+        android:layout_width="382dp"
+        android:layout_height="293dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
         android:autoSizeTextType="uniform"
-        android:textSize="36sp"
+        android:background="@drawable/tnm"
         android:text=""
+        android:textSize="12sp"
         app:autoSizeMinTextSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button" />
@@ -54,17 +55,5 @@
         app:autoSizeMinTextSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/hello" />
-
-    <TextView
-        android:id="@+id/resTextView2"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="50dp"
-        android:autoSizeTextType="uniform"
-        android:textSize="24sp"
-        app:autoSizeMinTextSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/resTextView" />
 
 </android.support.constraint.ConstraintLayout>

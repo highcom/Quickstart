@@ -208,7 +208,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         TextView txt = (TextView) this.findViewById(R.id.hello); //
         TextView resTxt = (TextView) this.findViewById(R.id.resTextView); //
-        TextView resTxt2 = (TextView) this.findViewById(R.id.resTextView2); //
 
         //質問ボタンを押下時にビープ音を鳴らす
         ToneGenerator toneGenerator
@@ -243,7 +242,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                 //BOTからの回答をクリアする
                 resTxt.setText("");
-                resTxt2.setText("");
 
                 //BOTに認識した音声を投げる
                 sendMessageToBot(result.getText(), conversationId,localToken);
@@ -499,8 +497,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     if (msgFrom.trim().toLowerCase().equals(botName)) {
 
                         responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
-
-                        speechText(responseMsg);
                         resTxt.setText(responseMsg);
 
 
@@ -522,13 +518,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     Integer arrayLength = jsonObject.getJSONArray("activities").length();
                     String msgFrom = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).getJSONObject("from").get("id").toString();
                     String curMsgId = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).get("id").toString();
-                    TextView resTxt = (TextView) this.findViewById(R.id.resTextView2); //
+                   // TextView resTxt = (TextView) this.findViewById(R.id.resTextView2); //
 
                     if(msgFrom.trim().toLowerCase().equals(botName2)) {
 
                         responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
 
-                        resTxt.setText(responseMsg);
+                     //   resTxt.setText(responseMsg);
 
 
                     }
