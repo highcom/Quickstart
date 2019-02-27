@@ -1,57 +1,52 @@
 package com.microsoft.cognitiveservices.speech.samples.quickstart;
 
+import android.app.SearchManager;
+import android.content.Intent;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.StrictMode;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
-
-
 
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
-import com.microsoft.cognitiveservices.speech.samples.quickstart.HttpResponsAsync;
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 
-
-import java.util.concurrent.Future;
-
-
-
-import static android.Manifest.permission.*;
-
-import android.os.StrictMode; //direct line sample 追加
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.HttpURLConnection;
-import java.io.IOException;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.Reader;
-import java.io.InputStreamReader;
-import android.os.AsyncTask;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import android.os.Handler;
-
-
-import android.media.AudioManager;
-import android.media.ToneGenerator;
+import static android.Manifest.permission.INTERNET;
+import static android.Manifest.permission.RECORD_AUDIO;
 
 public class MainActivity extends AppCompatActivity {
 
     // Replace below with your own subscription key
-    private static String speechSubscriptionKey = "5fe3ee808b15424a851a42a1303f77ab";
+    private static String speechSubscriptionKey = "1e8f878e47964d568280b9434902af91";
     // Replace below with your own service region (e.g., "westus").
     private static String serviceRegion = "westus";
 
@@ -60,19 +55,29 @@ public class MainActivity extends AppCompatActivity {
     private static String primaryToken2 = "7yTJO2s_wP4.cwA.bcc.AVTtKCskIzkZ4FqX1XkQld9hM6tNlW3DgGSPBvBwO04";
     private static String botName2 = "shimabot";
 
+    private Button recognizeContinuousButton;
 
     private String conversationId = "";
     private String localToken = "";
-    private String lastResponseMsgId = "";
+
 
     private String conversationId2 = "";
     private String localToken2 = "";
-    private String lastResponseMsgId2 = "";
+
+    private TextView recognizedTextView;
+
+    private MicrophoneStream microphoneStream;
+    private MicrophoneStream createMicrophoneStream() {
+        if (microphoneStream != null) {
+            microphoneStream.close();
+            microphoneStream = null;
+        }
+
+        microphoneStream = new MicrophoneStream();
+        return microphoneStream;
+    }
 
 
-    private ArrayList<ChatMessage> chatHistory;
-
-    private Integer apl_status = 0;
 
     Handler handler = new Handler();
     Runnable runnable = new Runnable() {
@@ -88,26 +93,121 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        recognizeContinuousButton = (Button)findViewById(R.id.button2);
 
 
+        // create config
+        final SpeechConfig speechConfig;
+        try {
+            speechConfig = SpeechConfig.fromSubscription("1e8f878e47964d568280b9434902af91", "westus");
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            displayException(ex);
+            return;
+        }
 
-        new Connection().execute("青葉区");
+
+        //アプリ起動時にBotと接続する
+        new Connection().execute("");
 
         // Note: we need to request the permissions
         int requestCode = 5; // unique code for the permission request
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{RECORD_AUDIO, INTERNET}, requestCode);
         runnable.run();
+
+        ///////////////////////////////////////////////////
+        // recognize continuously
+        ///////////////////////////////////////////////////
+        recognizeContinuousButton.setOnClickListener(new View.OnClickListener() {
+            private static final String logTag = "reco 3";
+            private boolean continuousListeningStarted = false;
+            private SpeechRecognizer reco = null;
+            private AudioConfig audioInput = null;
+            private String buttonText = "";
+            private ArrayList<String> content = new ArrayList<>();
+
+            @Override
+            public void onClick(final View view) {
+                final Button clickedButton = (Button) view;
+                // disableButtons();
+                if (continuousListeningStarted) {
+                    if (reco != null) {
+                        final Future<Void> task = reco.stopContinuousRecognitionAsync();
+                        setOnTaskCompletedListener(task, result -> {
+                            Log.i(logTag, "Continuous recognition stopped.");
+                            MainActivity.this.runOnUiThread(() -> {
+                                clickedButton.setText(buttonText);
+                            });
+                            //   enableButtons();
+                            continuousListeningStarted = false;
+                        });
+                    } else {
+                        continuousListeningStarted = false;
+                    }
+
+                    return;
+                }
+
+                clearTextBox();
+
+                try {
+                    content.clear();
+
+                    // audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                    audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                    reco = new SpeechRecognizer(speechConfig, audioInput);
+
+                    reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                        final String s = speechRecognitionResultEventArgs.getResult().getText();
+                        Log.i(logTag, "Intermediate result received: " + s);
+                        content.add(s);
+                        setRecognizedText(TextUtils.join(" ", content));
+                        content.remove(content.size() - 1);
+                    });
+
+                    reco.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                        final String s = speechRecognitionResultEventArgs.getResult().getText();
+                        Log.i(logTag, "Final result received: " + s);
+                        content.add(s);
+                        setRecognizedText(TextUtils.join(" ", content));
+                    });
+
+                    final Future<Void> task = reco.startContinuousRecognitionAsync();
+                    setOnTaskCompletedListener(task, result -> {
+                        continuousListeningStarted = true;
+                        MainActivity.this.runOnUiThread(() -> {
+                            buttonText = clickedButton.getText().toString();
+                            clickedButton.setText("Stop");
+                            clickedButton.setEnabled(true);
+                        });
+                    });
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                    displayException(ex);
+                }
+            }
+        });
+
     }
 
-    public void onSpeechButtonClicked(View v) {
-        TextView txt = (TextView) this.findViewById(R.id.hello); // 'hello' is the ID of your text view
-        TextView resTxt = (TextView) this.findViewById(R.id.resTextView); //
 
+
+
+
+
+    public void onSpeechButtonClicked(View v) {
+
+        TextView txt = (TextView) this.findViewById(R.id.hello); //
+        TextView resTxt = (TextView) this.findViewById(R.id.resTextView); //
+        TextView resTxt2 = (TextView) this.findViewById(R.id.resTextView2); //
+
+        //質問ボタンを押下時にビープ音を鳴らす
         ToneGenerator toneGenerator
                 = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
         toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
 
-        txt.setText(""); //質問をクリア
+        //質問をクリア
+        txt.setText("");
 
         try {
             SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
@@ -125,16 +225,22 @@ public class MainActivity extends AppCompatActivity {
             SpeechRecognitionResult result = task.get();
             assert(result != null);
 
-            apl_status = 1; //音声認識開始
+
 
             if (result.getReason() == ResultReason.RecognizedSpeech) {
+
+                //認識した音声を表示する
                 txt.setText(result.getText());
+
+                //BOTからの回答をクリアする
                 resTxt.setText("");
+                resTxt2.setText("");
+
+                //BOTに認識した音声を投げる
                 sendMessageToBot(result.getText(), conversationId,localToken);
                 sendMessageToBot(result.getText(), conversationId2,localToken2);
             }
             else {
-                //txt.setText("Error recognizing. Did you update the subscription info?" + System.lineSeparator() + result.toString());
                 txt.setText("音声をうまく認識できませんした。ボタンを押下してもう一度最初からお願いします");
             }
 
@@ -377,28 +483,18 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject jsonObject = new JSONObject(botResponse);
                     String responseMsg = "";
                     Integer arrayLength = jsonObject.getJSONArray("activities").length();
-                    String msgFrom = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).getJSONObject("from").get("id").toString();
-                    String curMsgId = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).get("id").toString();
+                    String msgFrom = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).getJSONObject("from").get("id").toString();
+                    String curMsgId = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("id").toString();
                     TextView resTxt = (TextView) this.findViewById(R.id.resTextView); //
 
-                    if(msgFrom.trim().toLowerCase().equals(botName)) {
-                        if(lastResponseMsgId == "") {
-                            responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
-                            AddResponseToChat(responseMsg);
+                    if (msgFrom.trim().toLowerCase().equals(botName)) {
 
-                            if( apl_status == 1 ) {
-                                resTxt.setText(responseMsg);
-                                apl_status = 1;
-                            }
-                            //lastResponseMsgId = curMsgId;
-                            lastResponseMsgId = "";
-                        }
-                        else if(!lastResponseMsgId.equals(curMsgId))
-                        {
-                            responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
-                            AddResponseToChat(responseMsg);
-                            lastResponseMsgId = curMsgId;
-                        }
+                        responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
+                        resTxt.setText(responseMsg);
+
+
+
+
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -418,23 +514,12 @@ public class MainActivity extends AppCompatActivity {
                     TextView resTxt = (TextView) this.findViewById(R.id.resTextView2); //
 
                     if(msgFrom.trim().toLowerCase().equals(botName2)) {
-                        if(lastResponseMsgId2 == "") {
-                            responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
-                            AddResponseToChat(responseMsg);
 
-                            if( apl_status == 1 ) {
-                                resTxt.setText(responseMsg);
-                                apl_status = 1;
-                            }
-                            //lastResponseMsgId2 = curMsgId;
-                            lastResponseMsgId2 = "";
-                        }
-                        else if(!lastResponseMsgId2.equals(curMsgId))
-                        {
-                            responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
-                            AddResponseToChat(responseMsg);
-                            lastResponseMsgId2 = curMsgId;
-                        }
+                        responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
+
+                        resTxt.setText(responseMsg);
+
+
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -446,23 +531,83 @@ public class MainActivity extends AppCompatActivity {
         handler.postDelayed(runnable, 1000*5);
     }
 
-    private void AddResponseToChat(String botResponse)
-    {
-        ChatMessage message = new ChatMessage();
-        //message.setId(2);
-        message.setMe(false);
-        message.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        message.setMessage(botResponse);
-        displayMessage(message);
+    public void resTextView_onClick(View view){
+        //質問ボタンを押下時にビープ音を鳴らす
+        ToneGenerator toneGenerator
+                = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
+        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
+
+        // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
+        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+        // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
+        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView)).getText().toString());
+        startActivity(intent);
+
+
     }
 
-    public void displayMessage(ChatMessage message) {
-   //     adapter.add(message);
-   //     adapter.notifyDataSetChanged();
-    //    scroll();
+
+
+
+    private void displayException(Exception ex) {
+        recognizedTextView.setText(ex.getMessage() + System.lineSeparator() + TextUtils.join(System.lineSeparator(), ex.getStackTrace()));
     }
 
+    private void clearTextBox() {
+      //  AppendTextLine("", true);
+    }
 
+    private void setRecognizedText(final String s) {
+      //  AppendTextLine(s, true);
+    }
+    /*
+    private void AppendTextLine(final String s, final Boolean erase) {
+        MainActivity.this.runOnUiThread(() -> {
+            if (erase) {
+                recognizedTextView.setText(s);
+            } else {
+                String txt = recognizedTextView.getText().toString();
+                recognizedTextView.setText(txt + System.lineSeparator() + s);
+            }
+        });
+    }
+    */
+    /*
+        private void disableButtons() {
+            MainActivity.this.runOnUiThread(() -> {
+                recognizeButton.setEnabled(false);
+                recognizeIntermediateButton.setEnabled(false);
+                recognizeContinuousButton.setEnabled(false);
+                recognizeIntentButton.setEnabled(false);
+            });
+        }
+        */
+    /*
+        private void enableButtons() {
+            MainActivity.this.runOnUiThread(() -> {
+                recognizeButton.setEnabled(true);
+                recognizeIntermediateButton.setEnabled(true);
+                recognizeContinuousButton.setEnabled(true);
+                recognizeIntentButton.setEnabled(true);
+            });
+        }
+    */
+    private <T> void setOnTaskCompletedListener(Future<T> task, OnTaskCompletedListener<T> listener) {
+        s_executorService.submit(() -> {
+            T result = task.get();
+            listener.onCompleted(result);
+            return null;
+        });
+    }
+
+    private interface OnTaskCompletedListener<T> {
+        void onCompleted(T taskResult);
+    }
+
+    private static ExecutorService s_executorService;
+    static {
+        s_executorService = Executors.newCachedThreadPool();
+    }
 
 }
 
