@@ -594,7 +594,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         //質問ボタンを押下時にビープ音を鳴らす
         ToneGenerator toneGenerator
                 = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
-        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
+        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
 
         // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
@@ -612,7 +612,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
         // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
-        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView)).getText().toString());
+        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView2)).getText().toString());
         startActivity(intent);
     }
 
@@ -625,7 +625,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
         // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
-        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView)).getText().toString());
+        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView3)).getText().toString());
         startActivity(intent);
     }
 

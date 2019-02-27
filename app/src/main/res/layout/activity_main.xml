@@ -6,33 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/resTextView3"
-        android:layout_width="match_parent"
-        android:layout_height="92dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="18dp"
-        android:autoSizeTextType="uniform"
-        android:clickable="true"
-        android:onClick="resTextView_onClick3"
-        android:textSize="12sp"
-        app:autoSizeMinTextSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/resTextView2" />
-
-    <TextView
-        android:id="@+id/resTextView2"
-        android:layout_width="match_parent"
-        android:layout_height="73dp"
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:autoSizeTextType="uniform"
-        android:clickable="true"
-        android:onClick="resTextView_onClick2"
-        android:textSize="12sp"
-        app:autoSizeMinTextSize="12sp"
+        android:layout_marginTop="16dp"
+        android:onClick="onSpeechButtonClicked"
+        android:text="質問する"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/resTextView" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/button2"
@@ -47,41 +30,61 @@
 
     <TextView
         android:id="@+id/hello"
-        android:layout_width="382dp"
-        android:layout_height="293dp"
+        android:layout_width="574dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
         android:autoSizeTextType="uniform"
-        android:background="@drawable/tnm"
+        android:background="@drawable/nandatte_01"
         android:text=""
         android:textSize="12sp"
         app:autoSizeMinTextSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button" />
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onSpeechButtonClicked"
-        android:text="質問する"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <TextView
         android:id="@+id/resTextView"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="36dp"
+        android:layout_width="574dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="50dp"
         android:autoSizeTextType="uniform"
+        android:background="@drawable/nandatte_02"
         android:clickable="true"
         android:onClick="resTextView_onClick"
         android:textSize="12sp"
         app:autoSizeMinTextSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/hello" />
+
+    <TextView
+        android:id="@+id/resTextView2"
+        android:layout_width="574dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:autoSizeTextType="uniform"
+        android:background="@drawable/nandatte_03"
+        android:clickable="true"
+        android:onClick="resTextView_onClick2"
+        android:textSize="12sp"
+        app:autoSizeMinTextSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/resTextView" />
+
+    <TextView
+        android:id="@+id/resTextView3"
+        android:layout_width="574dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:autoSizeTextType="uniform"
+        android:background="@drawable/nandatte_04"
+        android:clickable="true"
+        android:onClick="resTextView_onClick3"
+        android:textSize="12sp"
+        app:autoSizeMinTextSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/resTextView2" />
 
 </android.support.constraint.ConstraintLayout>
