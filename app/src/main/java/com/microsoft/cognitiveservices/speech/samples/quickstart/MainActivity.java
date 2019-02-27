@@ -40,10 +40,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import android.speech.tts.TextToSpeech;
+import java.util.Locale;
+
 import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.RECORD_AUDIO;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     // Replace below with your own subscription key
     private static String speechSubscriptionKey = "1e8f878e47964d568280b9434902af91";
@@ -65,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
     private String localToken2 = "";
 
     private TextView recognizedTextView;
+
+
+    private TextToSpeech mTextToSpeech; // 音声読上用
 
     private MicrophoneStream microphoneStream;
     private MicrophoneStream createMicrophoneStream() {
@@ -92,6 +98,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // TextToSpeech作成
+        mTextToSpeech = new TextToSpeech(this,this);
 
         recognizeContinuousButton = (Button)findViewById(R.id.button2);
 
@@ -490,6 +499,8 @@ public class MainActivity extends AppCompatActivity {
                     if (msgFrom.trim().toLowerCase().equals(botName)) {
 
                         responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
+
+                        speechText(responseMsg);
                         resTxt.setText(responseMsg);
 
 
@@ -607,6 +618,38 @@ public class MainActivity extends AppCompatActivity {
     private static ExecutorService s_executorService;
     static {
         s_executorService = Executors.newCachedThreadPool();
+    }
+
+    @Override
+    protected  void onDestroy(){
+        super.onDestroy();
+        if(mTextToSpeech != null){
+            mTextToSpeech.shutdown();
+        }
+    }
+
+    @Override
+    public void onInit(int status) {
+        if(TextToSpeech.SUCCESS == status){
+            Locale locale = Locale.JAPAN;
+            if(mTextToSpeech.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE){
+                mTextToSpeech.setLanguage(locale);
+            } else {
+                Log.e("MainActivity","言語設定エラー");
+            }
+        } else {
+
+            Log.e("MainActivity","TextToSpeech 初期設定エラー");
+        }
+    }
+
+    private void speechText(String text){
+        if(text.length() > 0){
+            if(mTextToSpeech.isSpeaking()){
+                mTextToSpeech.stop();
+            }
+            mTextToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        }
     }
 
 }
