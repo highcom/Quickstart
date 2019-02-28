@@ -1,24 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/titileview"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="52dp"
-        android:layout_height="100dp"
-
-        android:onClick="onTitleButtonClicked"
-        android:text="はじめる"
-        tools:text="はじめる" />
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/gifView"
-        android:layout_width="184dp"
-        android:layout_height="498dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="100dp" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:onClick="onTitleButtonClicked"
+        android:adjustViewBounds="true" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+
+        android:onClick="onTitleButtonClicked"
+        android:text="はじめる"
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintTop_toBottomOf="@+id/gifView"
+        tools:text="はじめる" />
 
 </LinearLayout>
