@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private static String primaryToken2 = "0tyZhernqF8.fnqsTQ3pUWXe3gfEZu7VH7QNprqJmN1EPKqDzPPYBJk";
     private static String botName2 = "ys-temp-bot";
     private static String primaryToken3 = "Oe1ifNUBT4s.07EOcXobHiymaFu8CXyf5sbEK_al6_--YWRumusHSU8";
-    private static String botName3 = "nandakke_qna_stable";
+    private static String botName3 = "nandakke_bot_stable";
 
 
     private Button recognizeContinuousButton;
@@ -71,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private String localToken3 = "";
 
     private TextView recognizedTextView;
+
+    private Integer sound = 0;
 
 
     private TextToSpeech mTextToSpeech; // 音声読上用
@@ -254,6 +256,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 sendMessageToBot(result.getText(), conversationId,localToken);
                 sendMessageToBot(result.getText(), conversationId2,localToken2);
                 sendMessageToBot(result.getText(), conversationId3,localToken3);
+
+                sound = 0;
             }
             else {
                 txt.setText("音声をうまく認識できませんした。ボタンを押下してもう一度最初からお願いします");
@@ -596,6 +600,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
         toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
 
+        sound = 1;
+
         // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
         // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
@@ -607,7 +613,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         //質問ボタンを押下時にビープ音を鳴らす
         ToneGenerator toneGenerator
                 = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
-        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
+        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
+
+        sound = 1;
 
         // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
@@ -620,7 +628,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         //質問ボタンを押下時にビープ音を鳴らす
         ToneGenerator toneGenerator
                 = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
-        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
+        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
+
+        sound = 1;
 
         // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
@@ -717,18 +727,21 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     private void speechText(String text, Integer s){
         if(text.length() > 0){
+            if( sound == 1){
             if(mTextToSpeech.isSpeaking()){
                 mTextToSpeech.stop();
-            }
-            if (s ==1 ) {
+            }}else             if (s ==1 ) {
                 mTextToSpeech.setSpeechRate(1.0f);
+                mTextToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, null);
             }else if( s == 2) {
                 mTextToSpeech.setSpeechRate(0.5f);
+                mTextToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, null);
             }else {
-                mTextToSpeech.setSpeechRate(1.3f);
+                mTextToSpeech.setSpeechRate(1.8f);
+                mTextToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, null);
             }
 
-            mTextToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+
         }
     }
 

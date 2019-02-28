@@ -30,11 +30,10 @@
 
     <TextView
         android:id="@+id/hello"
-        android:layout_width="574dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
-        android:autoSizeTextType="uniform"
         android:background="@drawable/nandatte_01"
         android:text=""
         android:textSize="12sp"
@@ -44,46 +43,52 @@
 
     <TextView
         android:id="@+id/resTextView"
-        android:layout_width="574dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="50dp"
-        android:autoSizeTextType="uniform"
+        android:layout_marginEnd="8dp"
+
         android:background="@drawable/nandatte_02"
         android:clickable="true"
         android:onClick="resTextView_onClick"
         android:textSize="12sp"
         app:autoSizeMinTextSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/hello" />
 
     <TextView
         android:id="@+id/resTextView2"
-        android:layout_width="574dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="20dp"
-        android:autoSizeTextType="uniform"
-        android:background="@drawable/nandatte_03"
+        android:layout_marginEnd="8dp"
+
+        android:background="@drawable/nandatte_05"
         android:clickable="true"
         android:onClick="resTextView_onClick2"
         android:textSize="12sp"
         app:autoSizeMinTextSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resTextView" />
 
     <TextView
         android:id="@+id/resTextView3"
-        android:layout_width="574dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="20dp"
-        android:autoSizeTextType="uniform"
+        android:layout_marginEnd="8dp"
+
         android:background="@drawable/nandatte_04"
         android:clickable="true"
         android:onClick="resTextView_onClick3"
         android:textSize="12sp"
         app:autoSizeMinTextSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resTextView2" />
 
