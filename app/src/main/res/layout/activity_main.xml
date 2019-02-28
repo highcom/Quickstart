@@ -23,10 +23,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="116dp"
         android:layout_marginTop="16dp"
-        android:onClick="onSpeechButtonClicked_start"
         android:text="質問する2"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="invisible" />
 
     <TextView
         android:id="@+id/hello"
@@ -36,7 +36,7 @@
         android:layout_marginTop="12dp"
         android:background="@drawable/nandatte_01"
         android:text=""
-        android:textSize="12sp"
+        android:textSize="20sp"
         app:autoSizeMinTextSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button" />
@@ -52,7 +52,7 @@
         android:background="@drawable/nandatte_02"
         android:clickable="true"
         android:onClick="resTextView_onClick"
-        android:textSize="12sp"
+        android:textSize="20sp"
         app:autoSizeMinTextSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -69,7 +69,7 @@
         android:background="@drawable/nandatte_05"
         android:clickable="true"
         android:onClick="resTextView_onClick2"
-        android:textSize="12sp"
+        android:textSize="20sp"
         app:autoSizeMinTextSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -86,7 +86,7 @@
         android:background="@drawable/nandatte_04"
         android:clickable="true"
         android:onClick="resTextView_onClick3"
-        android:textSize="12sp"
+        android:textSize="20sp"
         app:autoSizeMinTextSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

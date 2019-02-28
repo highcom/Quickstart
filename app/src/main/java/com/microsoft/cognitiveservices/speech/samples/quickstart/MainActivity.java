@@ -109,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         mTextToSpeech = new TextToSpeech(this,this);
 
         recognizeContinuousButton = (Button)findViewById(R.id.button2);
+        recognizeContinuousButton.setEnabled(false);
+        recognizeContinuousButton.setVisibility(View.INVISIBLE);
 
 
         // create config
@@ -143,6 +145,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
             @Override
             public void onClick(final View view) {
+                /*
                 final Button clickedButton = (Button) view;
                 // disableButtons();
                 if (continuousListeningStarted) {
@@ -200,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     System.out.println(ex.getMessage());
                     displayException(ex);
                 }
+                */
             }
         });
     }
