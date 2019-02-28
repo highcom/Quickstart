@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
@@ -45,6 +47,9 @@ import java.util.Locale;
 
 import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.RECORD_AUDIO;
+
+import android.widget.ImageView;
+
 
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
@@ -97,14 +102,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
     };
 
+    public void onTitleButtonClicked(View v) {
 
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // TextToSpeech作成
+// TextToSpeech作成
         mTextToSpeech = new TextToSpeech(this,this);
 
         recognizeContinuousButton = (Button)findViewById(R.id.button2);
@@ -201,6 +202,20 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 }
             }
         });
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //setContentView(R.layout.activity_main);
+
+        setContentView(R.layout.titlelayout);
+
+
+        ImageView imageView = (ImageView) findViewById(R.id.gifView);
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(imageView);
+        Glide.with(this).load(R.raw.logo).into(target);
+
 
     }
 
