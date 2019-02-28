@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         return microphoneStream;
     }
 
-
+    private String gResultString="";
 
     Handler handler = new Handler();
     Runnable runnable = new Runnable() {
@@ -266,15 +266,17 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 //認識した音声を表示する
                 txt.setText(result.getText());
 
+                gResultString = result.getText();
+
                 //BOTからの回答をクリアする
                 resTxt.setText("");
                 resTxt2.setText("");
                 resTxt3.setText("");
 
                 //BOTに認識した音声を投げる
-                sendMessageToBot(result.getText(), conversationId,localToken);
-                sendMessageToBot(result.getText(), conversationId2,localToken2);
-                sendMessageToBot(result.getText(), conversationId3,localToken3);
+                //sendMessageToBot(result.getText(), conversationId,localToken);
+                //sendMessageToBot(result.getText(), conversationId2,localToken2);
+                //sendMessageToBot(result.getText(), conversationId3,localToken3);
 
                 sound = 0;
             }
@@ -536,6 +538,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         String botResponse2 = "";
         String botResponse3 = "";
 
+        if(gResultString !="") {
+            sendMessageToBot(gResultString, conversationId,localToken);
+            sendMessageToBot(gResultString, conversationId2,localToken2);
+            sendMessageToBot(gResultString, conversationId3,localToken3);
+            gResultString="";
+        }
+
         if(conversationId != "" && localToken != "") {
             botResponse = getBotResponse(conversationId,localToken);
             if (botResponse != "") {
@@ -610,7 +619,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             }
         }
 
-        handler.postDelayed(runnable, 1000*5);
+        handler.postDelayed(runnable, 1000*2);
     }
 
     public void resTextView_onClick(View view){
