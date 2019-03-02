@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#ffffff"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     tools:context=".MainActivity">
 
     <Button
@@ -30,22 +39,21 @@
 
     <TextView
         android:id="@+id/hello"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/nandatte_01"
-        android:text=""
         android:textSize="20sp"
         app:autoSizeMinTextSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button" />
 
     <TextView
         android:id="@+id/resTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="8dp"
 
@@ -60,15 +68,14 @@
 
     <TextView
         android:id="@+id/resTextView2"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="8dp"
 
         android:background="@drawable/nandatte_05"
         android:clickable="true"
-        android:onClick="resTextView_onClick2"
+        android:onClick="resTextView_onClick"
         android:textSize="20sp"
         app:autoSizeMinTextSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -77,19 +84,20 @@
 
     <TextView
         android:id="@+id/resTextView3"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="8dp"
 
         android:background="@drawable/nandatte_04"
         android:clickable="true"
-        android:onClick="resTextView_onClick3"
+        android:onClick="resTextView_onClick"
         android:textSize="20sp"
         app:autoSizeMinTextSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resTextView2" />
 
+
 </android.support.constraint.ConstraintLayout>
+</ScrollView>

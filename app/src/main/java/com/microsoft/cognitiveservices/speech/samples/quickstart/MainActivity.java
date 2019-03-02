@@ -49,15 +49,22 @@ import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.RECORD_AUDIO;
 
 import android.widget.ImageView;
-
+import android.content.pm.ActivityInfo;
 
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
-    // Replace below with your own subscription key
+    //■ Speech Service
+    // speech service subscriptionkey
     private static String speechSubscriptionKey = "1e8f878e47964d568280b9434902af91";
-    // Replace below with your own service region (e.g., "westus").
+    // region (e.g., "westus").
     private static String serviceRegion = "westus";
+    private String gResultString="";
 
+    private TextView recognizedTextView;
+    private Button recognizeContinuousButton;
+
+    //■ Bot Service
+    // bot service key
     private static String primaryToken = "KJyTilMi2EA.cwA.UjY.WDd-zeGtpG9s41Sp_E11jEDb7EkTNvIHmShSTZFtRo8";
     private static String botName = "nandakke_qna_bot";
     private static String primaryToken2 = "0tyZhernqF8.fnqsTQ3pUWXe3gfEZu7VH7QNprqJmN1EPKqDzPPYBJk";
@@ -65,22 +72,21 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private static String primaryToken3 = "Oe1ifNUBT4s.07EOcXobHiymaFu8CXyf5sbEK_al6_--YWRumusHSU8";
     private static String botName3 = "nandakke_bot_stable";
 
-
-    private Button recognizeContinuousButton;
-
     private String conversationId = "";
-    private String localToken = "";
     private String conversationId2 = "";
-    private String localToken2 = "";
     private String conversationId3 = "";
+
+    private String localToken = "";
+    private String localToken2 = "";
     private String localToken3 = "";
 
-    private TextView recognizedTextView;
+    private String[] strLogCurId = {"","",""};
 
+
+    //■ 音声出力用
     private Integer sound = 0;
-
-
-    private TextToSpeech mTextToSpeech; // 音声読上用
+    private Integer intSpeakEnable = 0;
+    private TextToSpeech mTextToSpeech;
 
     private MicrophoneStream microphoneStream;
     private MicrophoneStream createMicrophoneStream() {
@@ -88,26 +94,32 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             microphoneStream.close();
             microphoneStream = null;
         }
-
         microphoneStream = new MicrophoneStream();
         return microphoneStream;
     }
 
-    private String gResultString="";
-
+    // ポーリングによるBot応答用
     Handler handler = new Handler();
     Runnable runnable = new Runnable() {
         public void run() {
-            pollBotResponses();
+            pollBotResponses(conversationId, localToken, R.id.resTextView, botName,  1,1.0f);
+            pollBotResponses(conversationId2, localToken2, R.id.resTextView2, botName2, 2,0.5f);
+            pollBotResponses(conversationId3, localToken3, R.id.resTextView3, botName3, 3,1.8f);
+            gResultString = "";
+            handler.postDelayed(runnable, 1000*2);
         }
     };
 
+    //タイトルボタン押下時処理(OnCreateの処理をこっちにもってきた)
     public void onTitleButtonClicked(View v) {
 
+        //main activity表示
         setContentView(R.layout.activity_main);
-// TextToSpeech作成
+
+        // TextToSpeech作成(Androidのライブラリ。
         mTextToSpeech = new TextToSpeech(this,this);
 
+        // Speech Service
         recognizeContinuousButton = (Button)findViewById(R.id.button2);
         recognizeContinuousButton.setEnabled(false);
         recognizeContinuousButton.setVisibility(View.INVISIBLE);
@@ -122,10 +134,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             displayException(ex);
             return;
         }
-
-
-        //アプリ起動時にBotと接続する
-        new Connection().execute("");
 
         // Note: we need to request the permissions
         int requestCode = 5; // unique code for the permission request
@@ -213,20 +221,21 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
 
+        //アプリの画面を縦固定にする
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        //タイトル画面を設定する
         setContentView(R.layout.titlelayout);
 
+        //Botと接続開始
+        new Connection().execute("");
 
+        //GIFのアニメーションを実行する(3回繰り返して停止)
         ImageView imageView = (ImageView) findViewById(R.id.gifView);
-        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(imageView);
+        GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(imageView, 3);
         Glide.with(this).load(R.raw.logo).into(target);
 
-
     }
-
-
-
-
-
 
     public void onSpeechButtonClicked(View v) {
 
@@ -243,7 +252,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         //質問をクリア
         txt.setText("");
 
-        try {
+        //音声出力中の場合は停止する
+        if(mTextToSpeech.isSpeaking()){
+            mTextToSpeech.stop();
+        }
+
+            try {
             SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
             config.setSpeechRecognitionLanguage("ja-JP");
             assert(config != null);
@@ -260,13 +274,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             assert(result != null);
 
 
-
             if (result.getReason() == ResultReason.RecognizedSpeech) {
+            //if (true) {
 
                 //認識した音声を表示する
                 txt.setText(result.getText());
+                //txt.setText("サンプル質問になりますので回答をお願いします。");
 
                 gResultString = result.getText();
+                //gResultString = "今日は何の日ですか？";
 
                 //BOTからの回答をクリアする
                 resTxt.setText("");
@@ -529,24 +545,16 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         return responseValue;
     }
 
-    public void pollBotResponses()
+    public void pollBotResponses(String strConvId, String strToken,  Integer intViewId, String StrBotName,Integer intSpeakId, float fSpeakSpeed)
     {
-        //Toast.makeText(getBaseContext(),
-        //       "test",
-        //     Toast.LENGTH_SHORT).show();
-        String botResponse = "";
-        String botResponse2 = "";
-        String botResponse3 = "";
 
+        String botResponse = "";
         if(gResultString !="") {
-            sendMessageToBot(gResultString, conversationId,localToken);
-            sendMessageToBot(gResultString, conversationId2,localToken2);
-            sendMessageToBot(gResultString, conversationId3,localToken3);
-            gResultString="";
+            sendMessageToBot(gResultString, strConvId,strToken);
         }
 
-        if(conversationId != "" && localToken != "") {
-            botResponse = getBotResponse(conversationId,localToken);
+        if(strConvId != "" && strToken != "") {
+            botResponse = getBotResponse(strConvId,strToken);
             if (botResponse != "") {
                 try {
                     JSONObject jsonObject = new JSONObject(botResponse);
@@ -554,15 +562,22 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     Integer arrayLength = jsonObject.getJSONArray("activities").length();
                     String msgFrom = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).getJSONObject("from").get("id").toString();
                     String curMsgId = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("id").toString();
-                    TextView resTxt = (TextView) this.findViewById(R.id.resTextView); //
+                    TextView resTxt = (TextView) this.findViewById(intViewId); //
 
-                    if (msgFrom.trim().toLowerCase().equals(botName)) {
-
+                    if (msgFrom.trim().toLowerCase().equals(StrBotName)) {
                         responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
-                        resTxt.setText(responseMsg);
-                        speechText(responseMsg,1);
+                     //   Log.e("debug_id",curMsgId+responseMsg);
+                     //   Log.e(      "debug_id", strLogCurId[intSpeakId-1]);
 
+                        /* 同一会話の場合は出力しない */
+                        if( !strLogCurId[intSpeakId-1].equals(curMsgId) ) {
+                            resTxt.setText(responseMsg);
 
+                            /* 正常応答の場合のみ、音声出力済みとする */
+                            if( speechText(responseMsg, fSpeakSpeed) == Boolean.TRUE ){
+                                strLogCurId[intSpeakId - 1] = curMsgId;
+                            }
+                        }
 
                     }
                 } catch (Exception e) {
@@ -570,60 +585,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 }
             }
         }
-
-        if(conversationId2 != "" && localToken2 != "") {
-            botResponse2 = getBotResponse(conversationId2,localToken2);
-            if (botResponse2 != "") {
-                try {
-                    JSONObject jsonObject = new JSONObject(botResponse2);
-                    String responseMsg = "";
-                    Integer arrayLength = jsonObject.getJSONArray("activities").length();
-                    String msgFrom = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).getJSONObject("from").get("id").toString();
-                    String curMsgId = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).get("id").toString();
-                    TextView resTxt = (TextView) this.findViewById(R.id.resTextView2); //
-
-                    if(msgFrom.trim().toLowerCase().equals(botName2)) {
-
-                        responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
-
-                        resTxt.setText(responseMsg);
-                        speechText(responseMsg,2);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        if(conversationId3 != "" && localToken3 != "") {
-            botResponse3 = getBotResponse(conversationId3,localToken3);
-            if (botResponse3 != "") {
-                try {
-                    JSONObject jsonObject = new JSONObject(botResponse3);
-                    String responseMsg = "";
-                    Integer arrayLength = jsonObject.getJSONArray("activities").length();
-                    String msgFrom = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).getJSONObject("from").get("id").toString();
-                    String curMsgId = jsonObject.getJSONArray("activities").getJSONObject(arrayLength-1).get("id").toString();
-                    TextView resTxt = (TextView) this.findViewById(R.id.resTextView3); //
-
-                    if(msgFrom.trim().toLowerCase().equals(botName3)) {
-
-                        responseMsg = jsonObject.getJSONArray("activities").getJSONObject(arrayLength - 1).get("text").toString();
-
-                           resTxt.setText(responseMsg);
-                        speechText(responseMsg,3);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        handler.postDelayed(runnable, 1000*2);
     }
 
     public void resTextView_onClick(View view){
-        //質問ボタンを押下時にビープ音を鳴らす
+        //効果音を出す
         ToneGenerator toneGenerator
                 = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
         toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
@@ -633,41 +598,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
         // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
-        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView)).getText().toString());
+        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(view.getId())).getText().toString());
         startActivity(intent);
     }
-
-    public void resTextView_onClick2(View view){
-        //質問ボタンを押下時にビープ音を鳴らす
-        ToneGenerator toneGenerator
-                = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
-        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
-
-        sound = 1;
-
-        // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
-        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
-        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView2)).getText().toString());
-        startActivity(intent);
-    }
-
-    public void resTextView_onClick3(View view){
-        //質問ボタンを押下時にビープ音を鳴らす
-        ToneGenerator toneGenerator
-                = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
-        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
-
-        sound = 1;
-
-        // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
-        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
-        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(R.id.resTextView3)).getText().toString());
-        startActivity(intent);
-    }
-
-
 
 
     private void displayException(Exception ex) {
@@ -744,6 +677,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             Locale locale = Locale.JAPAN;
             if(mTextToSpeech.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE){
                 mTextToSpeech.setLanguage(locale);
+                intSpeakEnable = 1;
             } else {
                 Log.e("MainActivity","言語設定エラー");
             }
@@ -753,24 +687,27 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
     }
 
-    private void speechText(String text, Integer s){
-        if(text.length() > 0){
-            if( sound == 1){
+    private Boolean speechText(String text, float fSpeakSpeed){
+
+        if(sound == 1 ) {
             if(mTextToSpeech.isSpeaking()){
                 mTextToSpeech.stop();
-            }}else             if (s ==1 ) {
-                mTextToSpeech.setSpeechRate(1.0f);
-                mTextToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, null);
-            }else if( s == 2) {
-                mTextToSpeech.setSpeechRate(0.5f);
-                mTextToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, null);
-            }else {
-                mTextToSpeech.setSpeechRate(1.8f);
-                mTextToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, null);
+                return Boolean.TRUE;
             }
+        }
 
+        //Oninit完了していない場合はエラーを返す
+        if( intSpeakEnable != 1) {
+            return Boolean.FALSE;
 
         }
+
+        if(text.length() > 0){
+            mTextToSpeech.setSpeechRate(fSpeakSpeed);
+            mTextToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, null);
+
+        }
+        return Boolean.TRUE;
     }
 
 }
