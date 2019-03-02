@@ -82,6 +82,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     private String[] strLogCurId = {"","",""};
 
+    private TextView textResTextView;
+    private TextView textResTextView2;
+    private TextView textResTextView3;
+
 
     //■ 音声出力用
     private Integer sound = 0;
@@ -116,19 +120,25 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         //main activity表示
         setContentView(R.layout.activity_main);
 
+        recognizedTextView = findViewById(R.id.hello);
+        textResTextView =  findViewById(R.id.resTextView);
+        textResTextView2 =  findViewById(R.id.resTextView2);
+        textResTextView3 =  findViewById(R.id.resTextView3);
+
         // TextToSpeech作成(Androidのライブラリ。
         mTextToSpeech = new TextToSpeech(this,this);
 
         // Speech Service
         recognizeContinuousButton = (Button)findViewById(R.id.button2);
-        recognizeContinuousButton.setEnabled(false);
-        recognizeContinuousButton.setVisibility(View.INVISIBLE);
+        //recognizeContinuousButton.setEnabled(false);
+        //recognizeContinuousButton.setVisibility(View.INVISIBLE);
 
 
         // create config
         final SpeechConfig speechConfig;
         try {
-            speechConfig = SpeechConfig.fromSubscription("1e8f878e47964d568280b9434902af91", "westus");
+            speechConfig = SpeechConfig.fromSubscription(speechSubscriptionKey,  serviceRegion);
+            speechConfig.setSpeechRecognitionLanguage("ja-JP");
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             displayException(ex);
@@ -151,11 +161,25 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             private String buttonText = "";
             private ArrayList<String> content = new ArrayList<>();
 
+
             @Override
             public void onClick(final View view) {
-                /*
+
                 final Button clickedButton = (Button) view;
-                // disableButtons();
+
+                //質問ボタンを押下時にビープ音を鳴らす
+                ToneGenerator toneGenerator
+                        = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
+                toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
+
+                //BOTからの回答をクリアする
+                textResTextView.setText("");
+                textResTextView2.setText("");
+                textResTextView3.setText("");
+                sound = 0;
+                disableButtons();
+
+
                 if (continuousListeningStarted) {
                     if (reco != null) {
                         final Future<Void> task = reco.stopContinuousRecognitionAsync();
@@ -164,13 +188,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             MainActivity.this.runOnUiThread(() -> {
                                 clickedButton.setText(buttonText);
                             });
-                            //   enableButtons();
+                            enableButtons();
                             continuousListeningStarted = false;
+                            gResultString = content.toString();
                         });
                     } else {
                         continuousListeningStarted = false;
                     }
-
                     return;
                 }
 
@@ -179,8 +203,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 try {
                     content.clear();
 
-                    // audioInput = AudioConfig.fromDefaultMicrophoneInput();
-                    audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                    audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                    //audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
                     reco = new SpeechRecognizer(speechConfig, audioInput);
 
                     reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
@@ -211,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     System.out.println(ex.getMessage());
                     displayException(ex);
                 }
-                */
+
             }
         });
     }
@@ -239,18 +263,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     public void onSpeechButtonClicked(View v) {
 
-        TextView txt = (TextView) this.findViewById(R.id.hello); //
-        TextView resTxt = (TextView) this.findViewById(R.id.resTextView); //
-        TextView resTxt2 = (TextView) this.findViewById(R.id.resTextView2); //
-        TextView resTxt3 = (TextView) this.findViewById(R.id.resTextView3); //
-
         //質問ボタンを押下時にビープ音を鳴らす
         ToneGenerator toneGenerator
                 = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
         toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
 
         //質問をクリア
-        txt.setText("");
+        recognizedTextView.setText("");
 
         //音声出力中の場合は停止する
         if(mTextToSpeech.isSpeaking()){
@@ -278,16 +297,16 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             //if (true) {
 
                 //認識した音声を表示する
-                txt.setText(result.getText());
+                recognizedTextView.setText(result.getText());
                 //txt.setText("サンプル質問になりますので回答をお願いします。");
 
                 gResultString = result.getText();
                 //gResultString = "今日は何の日ですか？";
 
                 //BOTからの回答をクリアする
-                resTxt.setText("");
-                resTxt2.setText("");
-                resTxt3.setText("");
+                textResTextView.setText("");
+                textResTextView2.setText("");
+                textResTextView3.setText("");
 
                 //BOTに認識した音声を投げる
                 //sendMessageToBot(result.getText(), conversationId,localToken);
@@ -297,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 sound = 0;
             }
             else {
-                txt.setText("音声をうまく認識できませんした。ボタンを押下してもう一度最初からお願いします");
+                recognizedTextView.setText("声が小さいかも。もう一回話して");
             }
 
             reco.close();
@@ -608,13 +627,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     }
 
     private void clearTextBox() {
-      //  AppendTextLine("", true);
+        AppendTextLine("", true);
     }
 
     private void setRecognizedText(final String s) {
-      //  AppendTextLine(s, true);
+        AppendTextLine(s, true);
     }
-    /*
+
     private void AppendTextLine(final String s, final Boolean erase) {
         MainActivity.this.runOnUiThread(() -> {
             if (erase) {
@@ -625,27 +644,21 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             }
         });
     }
-    */
-    /*
+
+
         private void disableButtons() {
             MainActivity.this.runOnUiThread(() -> {
-                recognizeButton.setEnabled(false);
-                recognizeIntermediateButton.setEnabled(false);
                 recognizeContinuousButton.setEnabled(false);
-                recognizeIntentButton.setEnabled(false);
-            });
+              });
         }
-        */
-    /*
+
+
         private void enableButtons() {
             MainActivity.this.runOnUiThread(() -> {
-                recognizeButton.setEnabled(true);
-                recognizeIntermediateButton.setEnabled(true);
                 recognizeContinuousButton.setEnabled(true);
-                recognizeIntentButton.setEnabled(true);
             });
         }
-    */
+
     private <T> void setOnTaskCompletedListener(Future<T> task, OnTaskCompletedListener<T> listener) {
         s_executorService.submit(() -> {
             T result = task.get();
