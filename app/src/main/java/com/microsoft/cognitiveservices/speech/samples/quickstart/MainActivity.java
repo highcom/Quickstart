@@ -131,6 +131,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         mTextToSpeech = new TextToSpeech(this,this);
 
         // Speech Service
+        findViewById(R.id.button).setEnabled(false);
+        findViewById(R.id.button).setVisibility(View.INVISIBLE);
         recognizeContinuousButton = (Button)findViewById(R.id.button2);
         //recognizeContinuousButton.setEnabled(false);
         //recognizeContinuousButton.setVisibility(View.INVISIBLE);
