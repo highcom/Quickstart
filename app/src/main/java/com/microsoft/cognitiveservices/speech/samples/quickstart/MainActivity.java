@@ -102,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         return microphoneStream;
     }
 
+    private Integer intSpeekCnt=0;
+
     // ポーリングによるBot応答用
     Handler handler = new Handler();
     Runnable runnable = new Runnable() {
@@ -227,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         continuousListeningStarted = true;
                         MainActivity.this.runOnUiThread(() -> {
                             buttonText = clickedButton.getText().toString();
-                            clickedButton.setText("Stop");
+                            clickedButton.setText("話すのを止める");
                             clickedButton.setEnabled(true);
                         });
                     });
@@ -592,10 +594,22 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         if( !strLogCurId[intSpeakId-1].equals(curMsgId) ) {
                             resTxt.setText(responseMsg);
 
+
                             /* 正常応答の場合のみ、音声出力済みとする */
-                            if( speechText(responseMsg, fSpeakSpeed) == Boolean.TRUE ){
-                                strLogCurId[intSpeakId - 1] = curMsgId;
+                            if( intSpeekCnt == 1) {
+                                if (speechText(responseMsg, fSpeakSpeed) == Boolean.TRUE) {
+                                    strLogCurId[intSpeakId - 1] = curMsgId;
+                                }
                             }
+
+                            if (intSpeakId == 3) {
+                                if( intSpeekCnt == 0 ){
+                                    intSpeekCnt = 1;
+                                }else{
+                                    intSpeekCnt = 0;
+                                }
+                            }
+
                         }
 
                     }
