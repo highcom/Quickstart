@@ -67,8 +67,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     // bot service key
     private static String primaryToken = "KJyTilMi2EA.cwA.UjY.WDd-zeGtpG9s41Sp_E11jEDb7EkTNvIHmShSTZFtRo8";
     private static String botName = "nandakke_qna_bot";
-    private static String primaryToken2 = "0tyZhernqF8.fnqsTQ3pUWXe3gfEZu7VH7QNprqJmN1EPKqDzPPYBJk";
-    private static String botName2 = "ys-temp-bot";
+    private static String primaryToken2 = "VNp7WWz4cJA.A-YgOXeviBsWJ_BMkfQr50V94BKIgONxdN6X6zLfwHI";
+    private static String botName2 = "enjoji2_bot_stable";
     private static String primaryToken3 = "Oe1ifNUBT4s.07EOcXobHiymaFu8CXyf5sbEK_al6_--YWRumusHSU8";
     private static String botName3 = "nandakke_bot_stable";
 
