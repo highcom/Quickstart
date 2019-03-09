@@ -108,9 +108,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     Handler handler = new Handler();
     Runnable runnable = new Runnable() {
         public void run() {
-            pollBotResponses(conversationId, localToken, R.id.resTextView, botName,  1,1.0f);
-            pollBotResponses(conversationId2, localToken2, R.id.resTextView2, botName2, 2,0.5f);
-            pollBotResponses(conversationId3, localToken3, R.id.resTextView3, botName3, 3,1.8f);
+            pollBotResponses(conversationId, localToken, R.id.resTextView, botName,  1,1.0f, 3.0f);
+            pollBotResponses(conversationId2, localToken2, R.id.resTextView2, botName2, 2,0.5f, 0.6f);
+            pollBotResponses(conversationId3, localToken3, R.id.resTextView3, botName3, 3,1.8f, 2.0f);
             gResultString = "";
             handler.postDelayed(runnable, 1000*2);
         }
@@ -175,6 +175,11 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 ToneGenerator toneGenerator
                         = new ToneGenerator(AudioManager.STREAM_SYSTEM, ToneGenerator.MAX_VOLUME);
                 toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT);
+
+                //音声出力中の場合は停止する
+                if(mTextToSpeech.isSpeaking()){
+                    mTextToSpeech.stop();
+                }
 
                 //BOTからの回答をクリアする
                 textResTextView.setText("");
@@ -568,12 +573,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         return responseValue;
     }
 
-    public void pollBotResponses(String strConvId, String strToken,  Integer intViewId, String StrBotName,Integer intSpeakId, float fSpeakSpeed)
+    public void pollBotResponses(String strConvId, String strToken,  Integer intViewId, String StrBotName,Integer intSpeakId, float fSpeakSpeed, float fSpeckPicth)
     {
 
         String botResponse = "";
         if(gResultString !="") {
-            sendMessageToBot(gResultString, strConvId,strToken);
+            String strTemp;
+            strTemp = gResultString.replace("なんだっけ","").toString();
+            strTemp.replace("何だっけ","");
+            sendMessageToBot(strTemp, strConvId,strToken);
         }
 
         if(strConvId != "" && strToken != "") {
@@ -599,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                             /* 正常応答の場合のみ、音声出力済みとする */
                             if( intSpeekCnt == 1) {
-                                if (speechText(responseMsg, fSpeakSpeed) == Boolean.TRUE) {
+                                if (speechText(responseMsg, fSpeakSpeed, fSpeckPicth) == Boolean.TRUE) {
                                     strLogCurId[intSpeakId - 1] = curMsgId;
                                 }
                             }
@@ -633,7 +641,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         // インテント作成  引数はIntent.ACTION_WEB_SEARCH固定
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
         // putExtraのSearchManager.QUERYに対して検索する文字列を指定する
-        intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(view.getId())).getText().toString());
+        String strWeb;
+
+        strWeb = ( (TextView)findViewById(view.getId())).getText().toString();
+        strWeb = strWeb.replace("ですね","");
+        //intent.putExtra(SearchManager.QUERY, ( (TextView)findViewById(view.getId())).getText().toString());
+        intent.putExtra(SearchManager.QUERY, strWeb);
         startActivity(intent);
     }
 
@@ -716,7 +729,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
     }
 
-    private Boolean speechText(String text, float fSpeakSpeed){
+    private Boolean speechText(String text, float fSpeakSpeed, float fSpeckPitch){
 
         if(sound == 1 ) {
             if(mTextToSpeech.isSpeaking()){
@@ -733,6 +746,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         if(text.length() > 0){
             mTextToSpeech.setSpeechRate(fSpeakSpeed);
+            mTextToSpeech.setPitch(fSpeckPitch);
             mTextToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, null);
 
         }
